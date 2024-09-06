@@ -17,6 +17,9 @@ const ProductoSchema = Schema({
         type: String,
         required: true,
     },
+    imagen: {
+        type: Buffer, 
+    },
     tipoProducto: {
         type: Schema.Types.ObjectId,
         ref: 'TipoProducto',
