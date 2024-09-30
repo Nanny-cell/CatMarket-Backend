@@ -1,23 +1,44 @@
 const {response} = require('express');
 const Producto = require('../models/Producto');
+const MarcaProducto = require('../models/MarcaProducto');
+const TipoProducto = require('../models/TipoProducto');
 
 const obtenerProductos = async (req, res = response) => {
     const take = parseInt(req.query.take) || 10;
     const page = parseInt(req.query.skip) || 1;
     const skip = (page - 1) * take;
 
+    const { marca, tipoProducto } = req.query;
+
+    let filter = {};
+
+    if (marca) {
+        const marcaDoc = await MarcaProducto.findOne({ nombre: marca });
+        if (marcaDoc) {
+            filter.marca = marcaDoc._id; // Agregamos el _id de la marca al filtro
+        }
+    }
+
+    if (tipoProducto) {
+        const tipoProductoDoc = await TipoProducto.findOne({ nombre: tipoProducto });
+        if (tipoProductoDoc) {
+            filter.tipoProducto = tipoProductoDoc._id; // Agregamos el _id del tipoProducto al filtro
+        }
+    }
+
     try {
         // Obtener el total de documentos
-        const total = await Producto.countDocuments();
+        const total = await Producto.countDocuments(filter);
         const totalPages = Math.ceil(total / take);
 
         // Obtener los productos con paginación y relaciones
-        const productos = await Producto.find()
+        const productos = await Producto.find(filter)
+            .select('-imagen')
             .populate('tipoProducto', 'nombre')
             .populate('marca', 'nombre')
             .skip(skip)
             .limit(take);
-
+        /*
         // Convertir la imagen a base64 si existe
         const productosConImagenBase64 = productos.map(producto => {
             const productoObj = producto.toObject();
@@ -28,12 +49,12 @@ const obtenerProductos = async (req, res = response) => {
 
             return productoObj;
         });
-
+        */
         res.status(200).json({
             ok: true,
             msg: 'Productos obtenidos con éxito',
             productos: {
-                productos: productosConImagenBase64,
+                productos: productos,
                 page,
                 total,
                 totalPages
