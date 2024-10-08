@@ -33,12 +33,12 @@ const obtenerProductos = async (req, res = response) => {
 
         // Obtener los productos con paginación y relaciones
         const productos = await Producto.find(filter)
-            .select('-imagen')
+            //.select('-imagen')
             .populate('tipoProducto', 'nombre')
             .populate('marca', 'nombre')
             .skip(skip)
             .limit(take);
-        /*
+        
         // Convertir la imagen a base64 si existe
         const productosConImagenBase64 = productos.map(producto => {
             const productoObj = producto.toObject();
@@ -49,12 +49,12 @@ const obtenerProductos = async (req, res = response) => {
 
             return productoObj;
         });
-        */
+
         res.status(200).json({
             ok: true,
             msg: 'Productos obtenidos con éxito',
             productos: {
-                productos: productos,
+                productos: productosConImagenBase64,
                 page,
                 total,
                 totalPages
