@@ -1,0 +1,3 @@
+[build]
+  publish = "public" # directorio donde están los archivos estáticos
+  functions = "netlify/functions" # directorio donde estarán tus funciones (lambda)
